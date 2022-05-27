@@ -1,0 +1,20 @@
+// Configuration file
+{
+"VisionProcessorConfig":
+    { "stationID":"CVQT12345", "dataDirRoot":"./", "port":1025 },
+"CamConfigs":[
+    { "sn":"SN_33650012", "camType":"OCAM", "width":1280, "height":720, "fps":60,
+        "gain":150, "exposure":500,
+        "win_size":[300,300], "win_pos":[100,200],
+        "um_per_pixel":10.0,
+        "alias":"Upper camera"
+        },
+    {
+        "sn":"200901010001", "width":1280, "height":720, "fps":30,
+        // "gain"=150, "exposure":500,
+        "win_size":[300,300], "win_pos":[100,200],
+        "um_per_pixel":10.0,
+        "alias":"Side camera"
+    }
+  ]
+}
