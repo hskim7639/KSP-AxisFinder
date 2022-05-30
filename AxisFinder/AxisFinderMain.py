@@ -2,11 +2,22 @@
 import sys
 sys.path.append('../../Phovision/CVQtVisPro')
 
+from AxisFinder import *
 from CVQtWidget import *
 
 class AxisFinderWidget(CVQtWidget):
     def __init__(self,  parent=None, winflags=Qt.WindowFlags(),  **kwargs):
         super().__init__(parent,  winflags)
+        self._initProperties()
+        
+    def _initProperties(self):
+        tempfn = 'coreless_template_01.jpg'
+        self.template = cv.imread(tempfn)
+        self.ntemp_h = 20 # 2*ntemp_h is the # of rows of templates
+        htemp,  wtemp = self.template.shape[:2]
+        c0 = htemp//2; c1=c0-self.ntemp_h; c2=c0+self.ntemp_h
+        self.tempRange = (c1, c2) # template row ranges
+        self.template = self.template[c1:c2, :]
         
         
     def onNewImageAvailable(self,  cv_img):
@@ -14,7 +25,16 @@ class AxisFinderWidget(CVQtWidget):
         self.ledCapture.blink()
         QMutexLocker(self.mutexWork)
         #cv_img = cv.cvtColor(cv_img, cv.COLOR_BGR2GRAY)
-        image,  info = self._analyzeImage(cv_img,  pseudocolor=True)
+        #image,  info = self._analyzeImage(cv_img,  pseudocolor=True)
+        h, w = cv_img.shape[:2]
+        res = cv.matchTemplate(cv_img[h//2-self.ntemp_h:h//2+self.ntemp_h, :],  self.template,  cv.TM_CCOEFF_NORMED)
+        min_val, max_val, min_loc, max_loc = cv.minMaxLoc(res)
+        top_left = max_loc; bottom_right = (top_left[0] + w, top_left[1] + h)
+        #x = top_left[0]; y = top_left[1]
+        temp_h,  temp_w = self.template.shape[:2]
+        cx = top_left[0] + temp_w//2
+        
+        image,  info = AxisFinder._analyzeImage(cv_img,  tm_cx=cx,  tm_hafspan=117,  psuedocolor=False)
         img =self.convertCVImgeToQImage(image)
         img2 = self.drawOverlayOnImage(img)
 

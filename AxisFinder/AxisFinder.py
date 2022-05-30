@@ -9,7 +9,8 @@ class AxisFinder():
     def __init__(self):
         pass
 
-    def _analyzeImage(self,  cv_img,  **kwargs):
+    @staticmethod
+    def _analyzeImage(cv_img,  **kwargs):
         info = {}
         img_is_color = (len(cv_img.shape)==3)
         if kwargs.get('pseudocolor')==False:
@@ -114,7 +115,7 @@ def main(argv):
         #cvimg = cvimg[y:y+h,  x:x+w]
         dw = 50; dw2 = 70; guides = [w//2-dw2,  w//2-dw, w//2,  w//2+dw,  w//2+dw2]
         dts = np.append(dts,  time.time())
-        ret_img,  optv = axfinder._analyzeImage(cvimg,  guides=guides,   pseudocolor=True,  tm_cx=cx,  tm_hafspan=117)
+        ret_img,  optv = axfinder._analyzeImage(cvimg,  guides=guides,  tm_cx=cx,  tm_hafspan=117)
         print(optv)
         dts = np.append(dts,  time.time())
         cv.imwrite(newfn,  ret_img)
