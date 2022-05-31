@@ -2,6 +2,7 @@
 import sys
 sys.path.append('../../Phovision/CVQtVisPro')
 
+from PyQt5.QtWidgets import QMenu,  QFileDialog
 from AxisFinder import *
 from CVQtWidget import *
 
@@ -11,6 +12,7 @@ class AxisFinderWidget(CVQtWidget):
         self._initProperties()
         
     def _initProperties(self):
+        self.pseudocolor=False
         tempfn = 'coreless_template_01.jpg'
         self.template = cv.imread(tempfn)
         self.ntemp_h = 20 # 2*ntemp_h is the # of rows of templates
@@ -20,7 +22,8 @@ class AxisFinderWidget(CVQtWidget):
         self.template = self.template[c1:c2, :]
         
         
-    def onNewImageAvailable(self,  cv_img):
+    def onNewImageAvailable(self,  imgdata):
+        cv_img,  opt = imgdata
         # this method is called by the worker when an image is ready to render 
         self.ledCapture.blink()
         QMutexLocker(self.mutexWork)
@@ -34,7 +37,7 @@ class AxisFinderWidget(CVQtWidget):
         temp_h,  temp_w = self.template.shape[:2]
         cx = top_left[0] + temp_w//2
         
-        image,  info = AxisFinder._analyzeImage(cv_img,  tm_cx=cx,  tm_hafspan=117,  psuedocolor=False)
+        image,  info = AxisFinder._analyzeImage(cv_img,  tm_cx=cx,  tm_hafspan=117,  pseudocolor=self.pseudocolor)
         img =self.convertCVImgeToQImage(image)
         img2 = self.drawOverlayOnImage(img)
 
@@ -42,30 +45,37 @@ class AxisFinderWidget(CVQtWidget):
         #self.canvas.resize(img2.size())
         self.repaint()
         
-    def _analyzeImage(self,  cv_img,  **kwargs):
-        info = {}
-        if kwargs.get('pseudocolor'):
-            img_pseudo = cv.applyColorMap(cv_img, cv.COLORMAP_JET)
-        else:
-            img_pseudo = cv_img
-        geo = cv_img.shape # (h,w,color)
-        h,  w = geo[:2]
-        r_st,  navg = (100,  82)
-        grayimg = cv.cvtColor(cv_img,  cv.COLOR_BGR2GRAY)
-        row_avg = np.average(grayimg[r_st:r_st+navg, :],  axis=0)
-        eh = 256
-        avg_data = np.ndarray((w, 2), np.int32)
-        avg_data[:, 0]=np.arange(w); avg_data[:, 1]=eh -row_avg - 1
-        gr_img = np.zeros([eh, w],  np.uint8); gr_img.fill(255)
-        #cv.polylines(gr_img,  avg_data.reshape((-1, 1, 2)),  True, (128) )
-        for x in range(w):
-            y = eh - int( row_avg[x]) -1
-            gr_img[y:256, x] = 0
-        #image = cv.copyMakeBorder(img_pseudo, eh, 0, 0, 0, cv.BORDER_CONSTANT,value=[255,255, 255])
-        image = cv.copyMakeBorder(img_pseudo, eh, 0, 0, 0, cv.BORDER_CONSTANT,value=[255,255, 255])
-        image[0:eh, :, 1] = gr_img
-        return [image,  info]
+    def onPseudocolorSelected(self):
+        print('pseudocolor')
+        self.pseudocolor = not self.pseudocolor
         
+    def onSaveImage(self):
+        print('save image')
+        QMutexLocker(self.mutexWork)
+        fn = "cap_ovl_" + CVQtTool.getTimeStamp() + '.png'
+        if self.canvas.img is not None:
+            self.canvas.img.save(fn)
+        
+    def onSaveImageAs(self):
+        print('save image as')
+        QMutexLocker(self.mutexWork)
+        filter = "Images (*.png *.jpg)"
+        fn = QFileDialog.getSaveFileName(self,  'save image to file',  'cap_untitled.png',  filter)
+        if len(fn[0])>0 and self.canvas.img is not None:
+            fn = fn[0]
+            self.canvas.img.save(fn)
+        
+
+    def contextMenuEvent(self, event):
+        print('contex menu event')
+        menu = QMenu(self)
+        actPC = menu.addAction("pseudo color",  self.onPseudocolorSelected)
+        actPC.setCheckable(True)
+        actPC.setChecked(self.pseudocolor)
+        menu.addSeparator()
+        actSaveImage = menu.addAction("save image", self.onSaveImage)
+        actSaveImageAs = menu.addAction("save image as..",  self.onSaveImageAs)
+        menu.exec(event.globalPos())
         
         
         

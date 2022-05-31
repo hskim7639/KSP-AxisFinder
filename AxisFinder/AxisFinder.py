@@ -52,14 +52,14 @@ class AxisFinder():
         roiMargin = 15
         roiL = tm_cx-tm_halfspan+ roiMargin; roiR = tm_cx+tm_halfspan-roiMargin
         tm_cmin = np.min(row_avg[roiL:roiR])
-        # finding zerocrossings
+        # ----- finding zerocrossings
         tm_vthre = ( (tm_cavg-tm_cmin)*tm_thre + tm_cmin )
         row_avg[0:roiL]=0.0; row_avg[roiR+1:]=0.0
         row_avg -= tm_vthre
         row_avg_sign = np.sign(row_avg)
         row_avg_diff = np.diff(row_avg_sign)
         zerocrossings = np.where(row_avg_diff != 0)[0]
-        threL = zerocrossings[0]-1; threR = zerocrossings[1]
+        threL = zerocrossings[0]; threR = zerocrossings[1]
         threW = threR - threL
         info['guardwidth'] = threW
         gr_img[:, threL] = tm_guide_color
@@ -67,8 +67,16 @@ class AxisFinder():
         for x in range(w):
             y = eh -  row_avgInt[x] -1
             gr_img[y:256, x, :] = np.array([128, 128, 0], np.uint8)
+            rx = (2*tm_cx - x)-1
+            if (rx >= 0) and rx< w:
+                y2 = eh - row_avgInt[rx]+10; 
+                if y2<=0 or y2>=eh:
+                    y2 =0
+                gr_img[y2:256, x] = np.array([128, 0, 128],  np.uint8)
         txt = 'GW:{:3d}'.format(threW); pos = (10, 40)
         cv.putText(gr_img, txt,  pos,  cv.FONT_HERSHEY_SIMPLEX,  1,  (255, 0, 0),  2 )
+        # ----- end of "finding zerocrossings
+        
         #image = cv.copyMakeBorder(img_pseudo, eh, 0, 0, 0, cv.BORDER_CONSTANT,value=[255,255, 255])
         image = cv.copyMakeBorder(img_pseudo, eh, 0, 0, 0, cv.BORDER_CONSTANT,value=[255,255, 255])
         image[0:eh, :, :] = gr_img
