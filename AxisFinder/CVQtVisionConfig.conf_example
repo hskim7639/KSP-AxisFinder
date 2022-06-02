@@ -17,7 +17,7 @@
         "alias":"Side camera"
     }
   ],
-"AxisFinding":[
+"ApplicationOptions":[
 	{
 		"recipe":"blue",  "template":"coreless_template01.jpg"
 	}

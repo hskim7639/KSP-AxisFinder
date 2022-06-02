@@ -19,6 +19,8 @@ class AxisFinderWidget(CVQtWidget):
         
     def _configTemplate(self,  tempfn):
         self.template = cv.imread(tempfn)
+        if self.template is None:
+            return
         self.ntemp_h = 20 # 2*ntemp_h is the # of rows of templates
         htemp,  wtemp = self.template.shape[:2]
         c0 = htemp//2; c1=c0-self.ntemp_h; c2=c0+self.ntemp_h
