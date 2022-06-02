@@ -81,9 +81,20 @@ class AxisFinderWidget(CVQtWidget):
         
 if __name__=='__main__':
     app = QApplication(sys.argv)
-    w = AxisFinderWidget()
-    config =  CVQtVisionProcessorConfig()
-    config.loadFromJsonFile('./CVQtVisionConfig.conf')
-    w.setCamConfig(config.camConfigs[0],  config.dirInfo)
-    w.show()
-    app.exec()
+    normalOperation = True
+    probeCamera = False
+    for argv in sys.argv[1:]:
+        if '--help' in argv:
+            normalOperation = False
+        if '--probe' in argv:
+            print ('probe cameras')
+            normalOperation = False
+            caminfo_list = CVQtCaptureDevice.findCameras()
+            print(caminfo_list)
+    if normalOperation:
+        w = AxisFinderWidget()
+        config =  CVQtVisionProcessorConfig()
+        config.loadFromJsonFile('./CVQtVisionConfig.conf')
+        w.setCamConfig(config.camConfigs[0],  config.dirInfo)
+        w.show()
+        app.exec()
