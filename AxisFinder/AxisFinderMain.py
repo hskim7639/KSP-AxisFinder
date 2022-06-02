@@ -13,13 +13,24 @@ class AxisFinderWidget(CVQtWidget):
         
     def _initProperties(self):
         self.pseudocolor=False
+        self.axisFindingOptions = {}
         tempfn = 'coreless_template_01.jpg'
+        self._configTemplate(tempfn)
+        
+    def _configTemplate(self,  tempfn):
         self.template = cv.imread(tempfn)
         self.ntemp_h = 20 # 2*ntemp_h is the # of rows of templates
         htemp,  wtemp = self.template.shape[:2]
         c0 = htemp//2; c1=c0-self.ntemp_h; c2=c0+self.ntemp_h
         self.tempRange = (c1, c2) # template row ranges
         self.template = self.template[c1:c2, :]
+    
+    def setAxisFindingOption(self,  opts):
+        self.axisFindingOptions = opts
+        tempfn = opts.get('template')
+        if tempfn is not None:
+            fn = self.dirInfo.get("templateDir") + '/' + tempfn
+            self._configTemplate(fn)
         
         
     def onNewImageAvailable(self,  imgdata):
@@ -96,5 +107,6 @@ if __name__=='__main__':
         config =  CVQtVisionProcessorConfig()
         config.loadFromJsonFile('./CVQtVisionConfig.conf')
         w.setCamConfig(config.camConfigs[0],  config.dirInfo)
+        w.setAxisFindingOption(config.appOptions[0])
         w.show()
         app.exec()

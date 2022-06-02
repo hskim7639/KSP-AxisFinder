@@ -16,5 +16,10 @@
         "um_per_pixel":10.0,
         "alias":"Side camera"
     }
+  ],
+"AxisFinding":[
+	{
+		"recipe":"blue",  "template":"coreless_template01.jpg"
+	}
   ]
 }
