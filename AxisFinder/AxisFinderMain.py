@@ -56,6 +56,10 @@ class AxisFinderWidget(CVQtWidget):
 
         self.canvas.setImage(img2)
         #self.canvas.resize(img2.size())
+        if opt.get('OVERLAY')==True and isinstance(opt.get("FN"),  str):
+            fn = opt.get("FN")
+            print('save overlay to {}'.format(fn))
+            img2.save(fn)
         self.repaint()
         
     def onPseudocolorSelected(self):
